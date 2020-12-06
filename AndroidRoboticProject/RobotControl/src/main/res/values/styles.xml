@@ -1,0 +1,42 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="_ButtonFunctionKey">
+        <item name="android:layout_width">103dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:layout_margin">2dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:background">#FF5EBDC1</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat</item>item>
+    </style>
+
+    <style name="_ButtonFunctionKey2">
+        <item name="android:layout_width">76dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:layout_margin">2dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:background">#FF5EBDC1</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat</item>item>
+    </style>
+
+</resources>

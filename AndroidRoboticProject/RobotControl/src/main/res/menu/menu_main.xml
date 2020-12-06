@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.ORB_App.MainActivity">
+    <group
+        android:checkableBehavior="all"
+        android:enabled="true">
+        <item
+            android:id="@+id/action_connect"
+            android:checkable="false"
+            android:enabled="true"
+            android:title="Connect" />
+
+    </group>
+
+</menu>

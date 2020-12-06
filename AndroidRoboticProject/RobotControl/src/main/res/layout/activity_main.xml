@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    app:layout_optimizationLevel="standard"
+    tools:context=".MainActivity">
+
+
+
+
+    <LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:titleTextColor="@android:color/black" />
+
+
+        <RelativeLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="624dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginRight="20dp">
+
+
+            <TextView
+                android:id="@+id/msgVoltage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:text="..."
+                android:textAlignment="textStart"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                android:typeface="monospace" />
+
+            <TextView
+                android:id="@+id/msgORB1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/msgVoltage"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:text="..."
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                android:typeface="monospace" />
+
+            <TextView
+                android:id="@+id/msgORB2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/msgORB1"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:text="..."
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                android:typeface="monospace" />
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+
+                android:layout_marginTop="100dp">
+
+                <SeekBar
+                    android:id="@+id/seekBar1"
+                    style="@style/Widget.AppCompat.SeekBar.Discrete"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginTop="140dp"
+                    android:max="11"
+                    android:progress="5"
+                    android:rotationX="-2" />
+
+
+                <SeekBar
+                    android:id="@+id/seekBar2"
+                    style="@style/Widget.AppCompat.SeekBar.Discrete"
+                    android:layout_width="400dp"
+                    android:layout_height="40dp"
+
+                    android:layout_marginLeft="-160dp"
+                    android:layout_marginTop="200dp"
+
+                    android:max="11"
+                    android:progress="5"
+                    android:rotation="270"
+                    android:rotationX="-2" />
+            </RelativeLayout>
+
+
+        </RelativeLayout>
+    </LinearLayout>
+
+</android.support.design.widget.CoordinatorLayout>
