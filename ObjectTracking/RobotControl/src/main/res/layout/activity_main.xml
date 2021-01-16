@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    app:layout_optimizationLevel="standard"
+    tools:context=".MainActivity">
+
+
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:titleTextColor="@android:color/black" />
+
+
+        <RelativeLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="624dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="60dp"
+            android:layout_marginRight="20dp">
+
+
+            <TextView
+                android:id="@+id/msgVoltage"
+                android:rotation="180"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:text="..."
+                android:textAlignment="textStart"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                android:typeface="monospace" />
+
+            <TextView
+                android:id="@+id/msgORB1"
+                android:rotation="180"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/msgVoltage"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:text="..."
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                android:typeface="monospace" />
+
+            <TextView
+                android:id="@+id/msgORB2"
+                android:rotation="180"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/msgORB1"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:text="..."
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                android:typeface="monospace" />
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="500dp"
+
+                android:layout_marginTop="100dp">
+
+                <org.opencv.android.JavaCameraView
+                    android:id="@+id/camera_view"
+                    android:layout_width="332dp"
+                    android:layout_height="308dp" />
+
+                <Switch
+                    android:id="@+id/switch1"
+                    android:layout_below="@+id/camera_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:rotation="180"
+                    android:text="On/Off" />
+
+                <TextView
+                    android:id="@+id/msgcenterX"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/camera_view"
+                    android:layout_marginLeft="100dp"
+                    android:rotation="180"
+                    android:text="centerX" />
+
+
+            </RelativeLayout>
+
+
+
+
+        </RelativeLayout>
+    </LinearLayout>
+
+</android.support.design.widget.CoordinatorLayout>
