@@ -93,15 +93,14 @@
                     android:rotation="180"
                     android:text="On/Off" />
 
-                <TextView
-                    android:id="@+id/msgcenterX"
+                <ToggleButton
+                    android:id="@+id/toggleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/camera_view"
-                    android:layout_marginLeft="140dp"
-                    android:layout_marginTop="1dp"
+                    android:layout_marginLeft="230dp"
                     android:rotation="180"
-                    android:text="centerX" />
+                    android:text="Y-Mode" />
 
 
             </RelativeLayout>

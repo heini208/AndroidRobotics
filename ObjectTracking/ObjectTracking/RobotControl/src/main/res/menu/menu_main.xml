@@ -9,7 +9,8 @@
             android:id="@+id/action_connect"
             android:checkable="false"
             android:enabled="true"
-            android:title="Connect" />
+            android:title="Connect"
+            android:rotation="180"/>
 
     </group>
 

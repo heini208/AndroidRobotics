@@ -24,6 +24,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="5dp"
         android:text="Paired devices"
+        android:rotation="180"
         android:visibility="gone" />
 
     <ListView
@@ -32,6 +33,7 @@
         android:layout_width="306dp"
         android:layout_height="wrap_content"
         android:stackFromBottom="true"
+        android:rotation="180"
         android:textSize="24sp" />
     
 </LinearLayout>

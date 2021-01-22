@@ -22,9 +22,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.App.Bluetooth.BluetoothDeviceListActivity;
 import com.App.ORB.ORB;
@@ -68,10 +70,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 	private Mat mThresholded2;
 	private Mat mHSV2;
 
+
+
 	//RobotConrol
 	private double centerX =0;
+	private double centerY =0;
 	private boolean toggle = false;
+	private boolean ymode = false;
 	private int direction = 0;
+	private int distance =0;
+
+	private boolean ymodeLost = false;
+	private int angle =0;
+	private int speed = 255;
+	private int servoSpeed = speed;
 
 
 
@@ -123,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
+
 		orb     = new ORB();
 		orb.init(this, msgHandler, ORB_DATA_RECEIVED_MSG_ID );
         orb.configMotor(0, 144, 50, 50, 30);
@@ -130,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         //Sensor
 		//orb.configSensor(0,4,0,0);
-
+		orb.setModelServo(0,servoSpeed,0);
         //openCV
 		javaCameraView = (JavaCameraView) findViewById(R.id.camera_view);
 		javaCameraView.setCameraIndex(0);
@@ -153,48 +166,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 	}
 
 
-	public void objectFollowing(){
-		int speed = 500;
-		if (direction == -1) {
-			// driving Backwards
-			System.out.println("driving Backwards!");
-			orb.setMotor(0, ORB.Mode.SPEED, 700, 0);
-			orb.setMotor(1, ORB.Mode.SPEED, -700, 0);
-		}else if (direction == 1) {
-			if (centerX > 580) {
-			// drive left
-			System.out.println("driving right!");
-			orb.setMotor(0, ORB.Mode.SPEED, -300, 0);
-			orb.setMotor(1, ORB.Mode.SPEED, -300, 0);
 
-			}else if (centerX < 140) {
-				// drive right
-				System.out.println("driving left!");
-				orb.setMotor(0, ORB.Mode.SPEED, +300, 0);
-				orb.setMotor(1, ORB.Mode.SPEED, +300, 0);
-			}else{
-			// driving Foward
-					System.out.println("driving Forward!");
-					orb.setMotor(0, ORB.Mode.SPEED, -700, 0);
-					orb.setMotor(1, ORB.Mode.SPEED, 700, 0);
-				}
-		}else if (centerX > 480) {
-			// drive left
-			System.out.println("driving right!");
-			orb.setMotor(0, ORB.Mode.SPEED, -speed, 0);
-			orb.setMotor(1, ORB.Mode.SPEED, -speed, 0);
-
-		}else if (centerX < 240) {
-			// drive right
-			System.out.println("driving left!");
-			orb.setMotor(0, ORB.Mode.SPEED, +speed, 0);
-			orb.setMotor(1, ORB.Mode.SPEED, +speed, 0);
-		} else {
-			orb.setMotor(0, ORB.Mode.SPEED, 0, 0);
-			orb.setMotor(1, ORB.Mode.SPEED, 0, 0);
-		}
-
-	}
 
 	@Override
 	public void onCameraViewStopped() {
@@ -215,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 		//hsv Grenzbereiche
 		Scalar hsv_min = new Scalar(0,100,40);
-		Scalar hsv_max = new Scalar(5,255,255);
+		Scalar hsv_max = new Scalar(6,255,255);
 		Scalar hsv_min2 = new Scalar(175,100,40);
 		Scalar hsv_max2 = new Scalar(180,255,255);
 
@@ -230,11 +202,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 		//AN AUS Schalter
 		Switch sw = (Switch) findViewById(R.id.switch1);
+
 		sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
 				if (isChecked) {
 					// The toggle is enabled
 					toggle = true;
+
+
+
 
 				} else {
 					// The toggle is disabled
@@ -243,8 +220,26 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 			}
 		});
 
+		ToggleButton ymodeV = (ToggleButton) findViewById(R.id.toggleButton);
+		ymodeV.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (isChecked) {
+					ymode = true;
+					tooFar = 150000;
+				} else {
+					ymode = false;
+					tooClose = 250000;
+					tooFar = 200000;
+				}
+			}
+		});
+
+
+
 		//Auswertung des Kamerabilds
 		if ( toggle == true) {
+
+			//rot im Bild suchen und durschnitt berechnen
 			Mat locations = Mat.zeros(mThresholded.size(),mThresholded.channels());
 			Core.findNonZero(mThresholded,locations);
 			MatOfPoint density = new MatOfPoint(locations);
@@ -252,39 +247,44 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 			double  y = 0;
 			Point[] densityArray = density.toArray();
 
+			//entfernung abmessen
+			distance = densityArray.length;
 
-			if (densityArray.length >=250000){
-				direction = -1;
-			}
-			else if (densityArray.length > 6000 && densityArray.length< 200000 ){
-				direction = 1;
-			}else { direction = 0;}
-
-
-
-			if( densityArray.length > 6000 && densityArray.length < 250000) {
+			//x-y wert des Punktes berechnen
+			//&& densityArray.length < 250000
+			if( densityArray.length > 6000 ) {
 				for (int i = 0; i < densityArray.length; i++) {
 					x += densityArray[i].x;
 					y += densityArray[i].y;
 				}
 
 				//Kamera ist 90grad gedreht daher x=y und y=x
-				x = x/densityArray.length;
-				centerX = y/densityArray.length;
-			}else if ( centerX > 240 && centerX < 480 ){
-				centerX = 100;
+				ymodeLost = false;
+
+				centerY = x / densityArray.length;
+				centerX = y / densityArray.length;
+			}else{
+				ymodeLost = true;
+				if ( centerX > 240 && centerX < 480 ) {
+					centerX = 100;
+				}
+
 			}
 
 
 
 
-			//System.out.println("Ymean= " + y  + "densitylength= " + densityArray.length + "CENTER:= " + centerX);
-
+			System.out.println("Ymean= " + y  + "densitylength= " + densityArray.length + "CENTER:= " + centerX);
+			System.out.println("Y-Wert:" + centerY);
 			//Punkt bei centerX Platzieren ( CenterX ist der durschnitts X Wert aller roten Pixel)
-			Imgproc.circle(mThresholded, new Point(x,centerX), 3, new Scalar(0, 255, 0), 5);
+			Imgproc.circle(mThresholded, new Point(centerY,centerX), 3, new Scalar(0, 255, 0), 5);
 
+			if (ymode== true){
+				ymodeObjectFollowing();
+			}else {
+				objectFollowing();
+			}
 
-			objectFollowing();
 		}else {
 				orb.setMotor(0, ORB.Mode.SPEED, 0, 0);
 				orb.setMotor(1, ORB.Mode.SPEED, 0, 0);
@@ -301,6 +301,109 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 	}
 
+	private int ankathete = 50000;
+	private int ankatheteClose = 150000;
+	private int marginbot = 300;
+	private int margintop =660;
+	private double alpha = 0;
+
+	public void ymodeObjectFollowing(){
+		double motorspeed = 500;
+
+		if(ymodeLost== true){
+			motorspeed = motorspeed/2;
+		}
+
+
+
+			//Y-verfolgung
+		if (centerY <= marginbot) {
+			servoSpeed = speed;
+
+			angle -= 3;
+			if(angle <0){angle =0;}
+
+			orb.setModelServo(0, servoSpeed, angle);
+
+		} else if (centerY >= margintop) {
+			servoSpeed = speed;
+
+			angle += 3;
+			if(angle >60){angle =60;}
+
+			orb.setModelServo(0, servoSpeed, angle);
+
+		} else {
+			orb.setModelServo(0, 0, 0);
+			int tooCloseTemp = tooClose;
+			int tooFarTemp = tooFar;
+
+			//berechnung des tatsächlichen abstands unabängig vom Winkel
+			alpha = angle/100;
+			tooFarTemp = (int)(ankathete/Math.cos(alpha));
+
+			tooCloseTemp = (int)(ankatheteClose/Math.cos(alpha));
+
+			//umrechnung, da höhere distanz = weniger Pixeldichte bedeutet
+			tooFar = tooFar + (tooFar-tooFarTemp);
+			tooClose = tooClose + (tooClose - tooCloseTemp);
+
+			System.out.println(tooClose+ " too far: " + tooFar + "angle: " + angle);
+
+		}
+		objectFollowing();
+
+
+
+
+
+	}
+
+	private int tooClose = 250000;
+	private int tooFar = 200000;
+	public void objectFollowing(){
+		int speed = 500;
+		if (distance >=tooClose) {
+			// driving Backwards
+			System.out.println("driving Backwards!");
+			orb.setMotor(0, ORB.Mode.SPEED, 700, 0);
+			orb.setMotor(1, ORB.Mode.SPEED, -700, 0);
+		}else if (distance > 6000 && distance< tooFar) {
+			if (centerX > 580) {
+				// drive left when further away
+				System.out.println("driving right!");
+				orb.setMotor(0, ORB.Mode.SPEED, -300, 0);
+				orb.setMotor(1, ORB.Mode.SPEED, -300, 0);
+
+			}else if (centerX < 140) {
+				// drive right when further away
+				System.out.println("driving left!");
+				orb.setMotor(0, ORB.Mode.SPEED, +300, 0);
+				orb.setMotor(1, ORB.Mode.SPEED, +300, 0);
+			}else{
+				// driving Foward
+				System.out.println("driving Forward!");
+				orb.setMotor(0, ORB.Mode.SPEED, -700, 0);
+				orb.setMotor(1, ORB.Mode.SPEED, 700, 0);
+			}
+		}else if (centerX > 480) {
+			// drive left
+			System.out.println("driving right!");
+			orb.setMotor(0, ORB.Mode.SPEED, -speed, 0);
+			orb.setMotor(1, ORB.Mode.SPEED, -speed, 0);
+
+		}else if (centerX < 240) {
+			// drive right
+			System.out.println("driving left!");
+			orb.setMotor(0, ORB.Mode.SPEED, +speed, 0);
+			orb.setMotor(1, ORB.Mode.SPEED, +speed, 0);
+		} else {
+			orb.setMotor(0, ORB.Mode.SPEED, 0, 0);
+			orb.setMotor(1, ORB.Mode.SPEED, 0, 0);
+		}
+
+	}
+
 	@Override
 	public void onPointerCaptureChanged(boolean hasCapture) {
 
@@ -313,10 +416,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 		if(javaCameraView != null){
 			javaCameraView.disableView();
 		}
-        orb.close();
-        super.onDestroy();
+		orb.setModelServo(0,servoSpeed,0);
 		orb.setMotor(0, ORB.Mode.SPEED, 0, 0);
 		orb.setMotor(1, ORB.Mode.SPEED, 0, 0);
+        orb.close();
+        super.onDestroy();
+
     }
 
     //---------------------------------------------------------------
