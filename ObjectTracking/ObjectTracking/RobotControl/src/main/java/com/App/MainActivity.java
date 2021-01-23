@@ -143,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         //Sensor
 		//orb.configSensor(0,4,0,0);
+
 		orb.setModelServo(0,servoSpeed,0);
         //openCV
 		javaCameraView = (JavaCameraView) findViewById(R.id.camera_view);
@@ -329,7 +330,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 			servoSpeed = speed;
 
 			angle += 3;
-			if(angle >60){angle =60;}
+			if(angle >60){
+				System.out.println("driving Backwards!");
+				orb.setMotor(0, ORB.Mode.SPEED, 700, 0);
+				orb.setMotor(1, ORB.Mode.SPEED, -700, 0);
+				angle =60;}
 
 			orb.setModelServo(0, servoSpeed, angle);
 
