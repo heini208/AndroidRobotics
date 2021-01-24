@@ -73,17 +73,24 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
 	//RobotConrol
+    // mittelwert der roten Pixelkoordinaten
 	private double centerX =0;
 	private double centerY =0;
+	//ON OFF
 	private boolean toggle = false;
+	// Y-Modus ON OFF
 	private boolean ymode = false;
-	private int direction = 0;
+	// Abstand zum Objekt geschaetzt in Pixelanzahl
 	private int distance =0;
 
+    //State variable ob das Objekt waehrend der y verfolgung verloren ging
 	private boolean ymodeLost = false;
+
 	private int angle =0;
+
 	private final int speed = 255;
 	private int servoSpeed = speed;
+	//Mindestanzahl an Pixeln ab der ein Objekt erkannt wird
 	private final int minPixels = 4000;
 
 	// ! Wichtige Methoden sind onCameraFrame(), ymodeObjectFollowing(), objectFollowing() !
