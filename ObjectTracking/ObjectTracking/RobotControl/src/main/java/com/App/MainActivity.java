@@ -322,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 	// grenzbereiche wann sich der Servo nach oben/unten bewegen soll
 	private int marginbot = 300;
 	private int margintop =660;
-	//gibt an ob die kamera ihren maximalen Winkel überschreiten wuerde
+	//gibt an ob die kamera ihren maximalen Winkel ueberschreiten wuerde
 	private boolean over60 = false;
 
 	public void ymodeObjectFollowing(){
@@ -375,13 +375,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             int tooCloseTemp = tooClose;
             int tooFarTemp = tooFar;
 
-			//berechnung des tatsächlichen abstands unabängig vom Winkel
+			//berechnung des tatsaechlichen abstands unabaengig vom Winkel
 			alpha = angle/100;
 
 			tooFarTemp = (int)(ankathete/Math.cos(alpha));
 			tooCloseTemp = (int)(ankatheteClose/Math.cos(alpha));
 
-			//umrechnung, da höhere distanz = weniger Pixeldichte bedeutet
+			//umrechnung, da hoehere distanz = weniger Pixeldichte bedeutet
 			tooFar = tooFar + (tooFar-tooFarTemp);
 			tooClose = tooClose + (tooClose - tooCloseTemp);
 
