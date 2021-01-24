@@ -82,8 +82,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 	private boolean ymodeLost = false;
 	private int angle =0;
-	private int speed = 255;
+	private final int speed = 255;
 	private int servoSpeed = speed;
+	private final int minPixels = 4000;
+
+	// ! Wichtige Methoden sind onCameraFrame(), ymodeObjectFollowing(), objectFollowing() !
+
 
 
 
@@ -141,9 +145,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         orb.configMotor(0, 144, 50, 50, 30);
         orb.configMotor(1, 144, 50, 50, 30);
 
-        //Sensor
-		//orb.configSensor(0,4,0,0);
-
+        //y-Servo
 		orb.setModelServo(0,servoSpeed,0);
         //openCV
 		javaCameraView = (JavaCameraView) findViewById(R.id.camera_view);
@@ -177,19 +179,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 	@Override
 	public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-		//orb.configSensor(0,4,0,0);
 		//System.out.println("SensorValue: "+ orb.getSensorValue(0)+ " ," +orb.getSensorValueDigital(0,0)+ " , "+ orb.getSensorValueDigital(0,1) +" , "+orb.getSensorValueAnalog(0,0));
-
-
-
 
 		//Kamerabild
 		mRgba = inputFrame.rgba();
 
 		//hsv Grenzbereiche
-		Scalar hsv_min = new Scalar(0,100,40);
-		Scalar hsv_max = new Scalar(6,255,255);
-		Scalar hsv_min2 = new Scalar(175,100,40);
+		Scalar hsv_min = new Scalar(0,100,25);
+		Scalar hsv_max = new Scalar(5,255,255);
+		Scalar hsv_min2 = new Scalar(175,100,25);
 		Scalar hsv_max2 = new Scalar(180,255,255);
 
 		//Kamerabild soll nur Farben im HSV bereich wahrnehmen
@@ -220,13 +218,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 				}
 			}
 		});
-
+        // Modus ob die Kamera in Y-Richtung beweglich sein soll
 		ToggleButton ymodeV = (ToggleButton) findViewById(R.id.toggleButton);
 		ymodeV.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if (isChecked) {
 					ymode = true;
-					tooFar = 150000;
 				} else {
 					ymode = false;
 					tooClose = 250000;
@@ -251,9 +248,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 			//entfernung abmessen
 			distance = densityArray.length;
 
-			//x-y wert des Punktes berechnen
-			//&& densityArray.length < 250000
-			if( densityArray.length > 6000 ) {
+			//x-y wert des Mittelpunktes berechnen
+			if( densityArray.length > minPixels ) {
 				for (int i = 0; i < densityArray.length; i++) {
 					x += densityArray[i].x;
 					y += densityArray[i].y;
@@ -265,30 +261,41 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 				centerY = x / densityArray.length;
 				centerX = y / densityArray.length;
 			}else{
+			    //fall wenn der Ball nicht mehr im Bild ist
 				ymodeLost = true;
+				// wenn der Ball zu schnell aus dem Bild laeuft
 				if ( centerX > 240 && centerX < 480 ) {
 					centerX = 100;
+
+
 				}
 
 			}
 
 
 
+            //Kontrollwerte
+			System.out.println("Y-Wert:" + centerY  + "densitylength= " + densityArray.length + "CENTER:= " + centerX);
 
-			System.out.println("Ymean= " + y  + "densitylength= " + densityArray.length + "CENTER:= " + centerX);
-			System.out.println("Y-Wert:" + centerY);
-			//Punkt bei centerX Platzieren ( CenterX ist der durschnitts X Wert aller roten Pixel)
+			//Punkt bei centerX und centerY Platzieren ( CenterX ist der durschnitts X Wert aller roten Pixel)
 			Imgproc.circle(mThresholded, new Point(centerY,centerX), 3, new Scalar(0, 255, 0), 5);
 
 			if (ymode== true){
+			    // Methode zur Objektverfolgung mit Y-Bewegung
 				ymodeObjectFollowing();
 			}else {
+			    //Methode zur Objektverfolgung nur auf y=0 grad;
 				objectFollowing();
 			}
 
 		}else {
+		        // wenn ON schalter auf OFF
 				orb.setMotor(0, ORB.Mode.SPEED, 0, 0);
 				orb.setMotor(1, ORB.Mode.SPEED, 0, 0);
+				if ( ymode == true){
+					orb.setModelServo(0,servoSpeed,0);
+
+				}
 			}
 
 
@@ -301,37 +308,47 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 			return  mHSV2;
 
 	}
-
+    //Variablen zur berechnung der Tatsaechlichen entfernung
 	private int ankathete = 50000;
 	private int ankatheteClose = 150000;
+    private double alpha = 0;
+	// grenzbereiche wann sich der Servo nach oben/unten bewegen soll
 	private int marginbot = 300;
 	private int margintop =660;
-	private double alpha = 0;
+	//gibt an ob die kamera ihren maximalen Winkel überschreiten wuerde
+	private boolean over60 = false;
 
 	public void ymodeObjectFollowing(){
 		double motorspeed = 500;
 
+		//Objekt wurde verloren suche es auf dem Boden
 		if(ymodeLost== true){
-			motorspeed = motorspeed/2;
+			//motorspeed = motorspeed/2;
+			orb.setModelServo(0,servoSpeed,0);
 		}
 
 
-
-			//Y-verfolgung
+		//Y-verfolgung
 		if (centerY <= marginbot) {
+		    //Objekt ist zu weit unten
 			servoSpeed = speed;
 
+			//kleinschrittige aenderung des Winkels, da der Servo sonst zu schnell ist ( auch bei speed = 1;)
 			angle -= 3;
 			if(angle <0){angle =0;}
 
 			orb.setModelServo(0, servoSpeed, angle);
 
 		} else if (centerY >= margintop) {
+
+		    //Objekt ist zu weit oben
 			servoSpeed = speed;
 
 			angle += 3;
-			if(angle >60){
-				System.out.println("driving Backwards!");
+			if(angle >=60){
+			    //Objekt hat Grenzwinkel ueberschritten
+				System.out.println("driving Backwards due to angle!");
+				over60 = true;
 				orb.setMotor(0, ORB.Mode.SPEED, 700, 0);
 				orb.setMotor(1, ORB.Mode.SPEED, -700, 0);
 				angle =60;}
@@ -339,66 +356,80 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 			orb.setModelServo(0, servoSpeed, angle);
 
 		} else {
+		    //Objekt ist ungefaehr mittig im Bild
 			orb.setModelServo(0, 0, 0);
-			int tooCloseTemp = tooClose;
-			int tooFarTemp = tooFar;
+
+            if(over60 == true){
+            	over60 = false;
+				orb.setMotor(0, ORB.Mode.SPEED, 0, 0);
+				orb.setMotor(1, ORB.Mode.SPEED, 0, 0);
+			}
+            //temporaere Variablen fuer Abstandsgraenzwerte
+            int tooCloseTemp = tooClose;
+            int tooFarTemp = tooFar;
 
 			//berechnung des tatsächlichen abstands unabängig vom Winkel
 			alpha = angle/100;
-			tooFarTemp = (int)(ankathete/Math.cos(alpha));
 
+			tooFarTemp = (int)(ankathete/Math.cos(alpha));
 			tooCloseTemp = (int)(ankatheteClose/Math.cos(alpha));
 
 			//umrechnung, da höhere distanz = weniger Pixeldichte bedeutet
 			tooFar = tooFar + (tooFar-tooFarTemp);
 			tooClose = tooClose + (tooClose - tooCloseTemp);
 
-			System.out.println(tooClose+ " too far: " + tooFar + "angle: " + angle);
+			System.out.println(tooFar+ " too far: "+ "angle: " + angle);
 
 		}
-		objectFollowing();
+		if (over60 == false) {
+		    // wenn Y-verfolgung erfolgreich X-verfolgung starten
+			objectFollowing();
 
+
+		}
 
 
 
 
 	}
 
+	// grenzwerte wann der Roboter zu weit oder zu nah vom objekt entfernt ist in Form von Anzahl an roter Pixel
 	private int tooClose = 250000;
 	private int tooFar = 200000;
 	public void objectFollowing(){
+	    //speed wenn der roboter vorm objekt ist braucht das meiste fine tuning von daher eine Variable
 		int speed = 500;
 		if (distance >=tooClose) {
-			// driving Backwards
+			// Rueckwaerts fahren wenn objekt zu nah drann ist
 			System.out.println("driving Backwards!");
 			orb.setMotor(0, ORB.Mode.SPEED, 700, 0);
 			orb.setMotor(1, ORB.Mode.SPEED, -700, 0);
-		}else if (distance > 6000 && distance< tooFar) {
+		}else if (distance > minPixels && distance< tooFar) {
 			if (centerX > 580) {
-				// drive left when further away
+				// rechts fahren wenn objekt im Bild aber zu weit weg und zu weit rechts
 				System.out.println("driving right!");
 				orb.setMotor(0, ORB.Mode.SPEED, -300, 0);
 				orb.setMotor(1, ORB.Mode.SPEED, -300, 0);
 
 			}else if (centerX < 140) {
-				// drive right when further away
+				// links fahren wenn objekt im Bild aber zu weit weg und zu weit links
 				System.out.println("driving left!");
 				orb.setMotor(0, ORB.Mode.SPEED, +300, 0);
 				orb.setMotor(1, ORB.Mode.SPEED, +300, 0);
 			}else{
-				// driving Foward
+				// forwaerts fahren wenn objekt zu weit weg aber ungefaer mittig
 				System.out.println("driving Forward!");
 				orb.setMotor(0, ORB.Mode.SPEED, -700, 0);
 				orb.setMotor(1, ORB.Mode.SPEED, 700, 0);
 			}
 		}else if (centerX > 480) {
-			// drive left
+			// nach rechts korrigieren wenn objekt einen guten Abstand hat aber zu weit rechts ist
 			System.out.println("driving right!");
 			orb.setMotor(0, ORB.Mode.SPEED, -speed, 0);
 			orb.setMotor(1, ORB.Mode.SPEED, -speed, 0);
 
 		}else if (centerX < 240) {
-			// drive right
+			// nach links korrigieren wenn objekt einen guten Abstand hat aber zu weit links ist
 			System.out.println("driving left!");
 			orb.setMotor(0, ORB.Mode.SPEED, +speed, 0);
 			orb.setMotor(1, ORB.Mode.SPEED, +speed, 0);
