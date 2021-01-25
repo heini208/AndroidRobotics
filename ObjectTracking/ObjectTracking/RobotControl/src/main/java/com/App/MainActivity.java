@@ -352,6 +352,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 			servoSpeed = speed;
 
 			angle += 3;
+			//maximaler winkel beliebig aber nicht >=90grad, da 90 grad in der Dreiecksrechnung undendlich bedeuten wuerde
+			// jedoch haben wir herausgefunden, dass mit unserer Rechung sehr hohe werte gegen 90 grad schlechter funktionieren weil er ball zu hoch ist
+			// wir vermuten, dies ist durch die relativ ungenaue Abstandsberechnung der Fall, bei kleineren Werten sind Schwankungen der Pixelanzahl der auffaelig
 			if(angle >=60){
 			    //Objekt hat Grenzwinkel ueberschritten
 				System.out.println("driving Backwards due to angle!");
