@@ -186,8 +186,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 	@Override
 	public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-		//System.out.println("SensorValue: "+ orb.getSensorValue(0)+ " ," +orb.getSensorValueDigital(0,0)+ " , "+ orb.getSensorValueDigital(0,1) +" , "+orb.getSensorValueAnalog(0,0));
-
 		//Kamerabild
 		mRgba = inputFrame.rgba();
 
