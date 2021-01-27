@@ -81,19 +81,19 @@ public class MainActivity extends AppCompatActivity
 
         seekBar1 = (SeekBar) findViewById(R.id.seekBar1);
 		seekBar2 = (SeekBar) findViewById(R.id.seekBar2);
-		seekBar2.setProgress(6);
+		//seekBar2.setProgress(6);
 
 		seekBar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 
 				if (i>5){
-					speed = (i-5)*200;
+					speed = (i-seekBar2.getMax()/2)*200;
 
 				}
 
-				else if (i<=5){
-					speed = -((5-i)*200);
+				else if (i<=seekBar2.getMax()/2){
+					speed = -((seekBar2.getMax()/2-i)*200);
 				}
 				orb.setMotor( 0, ORB.Mode.SPEED, -speed, 0);
 				orb.setMotor( 1, ORB.Mode.SPEED, +speed, 0);
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity
 
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
-			seekBar.setProgress(5);
+			seekBar.setProgress(seekBar2.getMax()/2);
 			}
 		});
 
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity
 					speed = (i-5)*100;
 
 				}
-				else if (i<=5){
+				else if (i<=seekBar2.getMax()/2){
 					speed = -((5-i)*100);
 				}
 				orb.setMotor( 0, ORB.Mode.SPEED, -speed, 0);
@@ -204,6 +204,18 @@ public class MainActivity extends AppCompatActivity
             default:
 		}
 	}
+    boolean servotest = false;
+    public void onClick_Servo( View view )
+    {
+        if(servotest == false){
+            orb.setModelServo(0, 100, 0);
+            servotest = true;
+        }else {
+            orb.setModelServo(0, 100, 100);
+            servotest = false;
+        }
+
+    }
 
     //-----------------------------------------------------------------
     //-----------------------------------------------------------------

@@ -103,7 +103,19 @@
                     android:progress="5"
                     android:rotation="270"
                     android:rotationX="-2" />
+
+                <Button
+                    android:id="@+id/Servo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/seekBar2"
+                    android:layout_marginLeft="120dp"
+                    android:layout_marginTop="100dp"
+                    android:onClick="onClick_Servo"
+                    android:text="Servo" />
             </RelativeLayout>
+
+
 
 
         </RelativeLayout>
